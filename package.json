@@ -1,0 +1,51 @@
+{
+  "name": "passport-jwt-sample",
+  "version": "1.0.0",
+  "description": "Securing REST api's using passport jwt and bcrypt",
+  "main": "index.js",
+  "scripts": {
+    "init": "npm install && npm install -g rimraf && mkdir logs",
+    "start:before": "rimraf logs && mkdir logs",
+    "start": "nodemon ./src/index.js --watch src --exec babel-node | pino-tee info ./logs/info-logs.log error ./logs/error-logs.log > ./logs/all-logs.log",
+    "build": "./node_modules/.bin/babel ./src -d dist --presets env,stage-3 --ignore ./src/_test/*.spec.js,./node_modules",
+    "serve": "node ./dist/index.js",
+    "clean": "rimraf ./dist",
+    "slate": "rimraf node_modules && npm install",
+    "lint": "eslint src",
+    "lint:fix": "eslint ./src --fix"
+  },
+  "keywords": [
+    "nodejs",
+    "passport",
+    "jwt",
+    "bcrypt",
+    "express",
+    "body-parser",
+    "async-await"
+  ],
+  "author": "Siddharth Kar",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "express-pino-logger": "^3.0.2",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.2.4",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
+    "pino": "^4.17.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.6",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "eslint": "^5.1.0",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "nodemon": "^1.18.3"
+  }
+}
