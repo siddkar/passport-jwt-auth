@@ -36,7 +36,9 @@
     "mongoose": "^5.2.4",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
-    "pino": "^4.17.3"
+    "passport-local": "^1.0.0",
+    "pino": "^4.17.3",
+    "pino-tee": "^0.2.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
