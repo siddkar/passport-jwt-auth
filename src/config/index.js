@@ -1,4 +1,4 @@
-import mongoose from './dbConnectConfig';
-import { logger, expressLogger } from './pinoLoggerConfig';
+import mongoose from './db.config';
+import { logger, expressLogger } from './pino.config';
 
 export { mongoose, logger, expressLogger };

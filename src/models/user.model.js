@@ -41,19 +41,18 @@ const UserSchema = new mongoose.Schema({
 
 // This is called a pre-hook, before the user information is saved in the database
 // this function will be called, we'll get the plain text password, hash it and store it
-UserSchema.pre('save', async (next) => {
+UserSchema.pre('save', async function savePre(next) {
     // the more higher the salt round more the security, but makes application slow
-    const hash = await bcrypt.hash(this.password, 20);
-    this.password = hash;
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
 // We'll use this later on to make sure that the user trying to log in has the correct credentials
-UserSchema.methods.isValidPassword = async (password) => {
+UserSchema.methods.isValidPassword = async function comparePwd(password) {
     // Hashes the password sent by the user for login and checks if the hashed password stored in the
     // database matches the one sent. Returns true if it does else false.
     const compare = await bcrypt.compare(password, this.password);
     return compare;
 };
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model('user', UserSchema);

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { logger, expressLogger } from './config';
 import router from './routes';
-import { auth } from './middleware';
+import { AuthMiddleware } from './middlewares';
 
 // initialize dotenv variables
 dotenv.config();
@@ -19,7 +19,7 @@ app.use(bodyParser.json({ limit: '2mb' }));
 app.use(bodyParser.urlencoded({ limit: '2mb', extended: 'false' }));
 
 // adding authentication middleware to express
-app.use(auth.initialize());
+app.use(AuthMiddleware.initialize());
 
 app.use(router);
 

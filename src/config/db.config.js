@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import bluebird from 'bluebird';
 import dotenv from 'dotenv';
-import { logger } from './pinoLoggerConfig';
+import { logger } from './pino.config';
 
 // instantiating dotenv
 dotenv.config();
@@ -26,7 +26,7 @@ const uri = `mongodb://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}`;
  * converting mongoose.connect with async/await
  */
 const initializeMongoose = async () => {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, { useNewUrlParser: true });
 };
 
 // intializing mongoose
