@@ -1,3 +1,3 @@
-const errorLog = (from, type, error) => ({ from, type, error });
+const errorLog = (from, code, error) => ({ from, code, error });
 
 export default errorLog;

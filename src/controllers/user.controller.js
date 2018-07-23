@@ -1,10 +1,6 @@
 import passport from 'passport';
 import { logger } from '../config';
 import { AppConstants, handleResponse, errorLog } from '../utils';
-/* const signup = async (req, res) => {
-    const signupRes = { ...req.user };
-    res.status(signupRes.status).send(signupRes);
-}; */
 
 const signupCallback = async (req, res) => {
     passport.authenticate('signup', async (err, success) => {
