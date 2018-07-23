@@ -43,7 +43,7 @@ const UserSchema = new mongoose.Schema({
 // this function will be called, we'll get the plain text password, hash it and store it
 UserSchema.pre('save', async function savePre(next) {
     // the more higher the salt round more the security, but makes application slow
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, parseInt(process.env.SALT_ROUNDS, 10));
     next();
 });
 

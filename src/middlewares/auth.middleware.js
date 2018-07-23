@@ -3,6 +3,7 @@ import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import LocalStrategy from 'passport-local';
 import { User } from '../models';
 import { AppConstants, handleResponse } from '../utils';
+import { logger } from '../config';
 
 const session = false;
 const passReqToCallback = true;
@@ -12,39 +13,43 @@ const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 };
 
-const signupStrategy = new LocalStrategy({
+const localStrategyOptions = {
     usernameField: 'email',
     passwordField: 'password',
     passReqToCallback,
-}, async (req, email, password, done) => {
+};
+
+const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email, password, done) => {
     const user = { ...req.body };
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return done(null, handleResponse(
+            const existingUserErr = handleResponse(
                 AppConstants.responseCodes.userExists,
-                AppConstants.httpStatus.ok,
+                AppConstants.httpStatus.unprocessableEntity,
                 AppConstants.errMsgs.userExists(user.email),
-            ));
+            );
+            logger.error({ type: AppConstants.responseCodes.userExists, existingUserErr });
+            return done(null, existingUserErr);
         }
-        const registeredUser = await User.create(user);
+        const newUser = await User.create(user);
         return done(null, {
             ...handleResponse(
                 AppConstants.responseCodes.signupSuccess,
                 AppConstants.httpStatus.created,
                 AppConstants.successMsgs.signupSuccess(user.firstName),
             ),
-            registeredUser,
+            newUser,
         });
-    } catch (error) {
-        return done(null, {
-            ...handleResponse(
-                AppConstants.responseCodes.genericErr,
-                AppConstants.httpStatus.internalServerError,
-                AppConstants.errMsgs.genericMsg,
-            ),
-            ...error,
-        });
+    } catch (err) {
+        // logging error rather than sending through API
+        logger.error({ type: AppConstants.errMsgs.genericMsg, err });
+        const genericError = handleResponse(
+            AppConstants.responseCodes.genericErr,
+            AppConstants.httpStatus.internalServerError,
+            AppConstants.errMsgs.genericMsg,
+        );
+        return done(null, genericError);
     }
 });
 
