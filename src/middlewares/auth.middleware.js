@@ -23,7 +23,7 @@ const signupStrategy = new LocalStrategy({
         if (existingUser) {
             return done(null, handleResponse(
                 AppConstants.responseCodes.userExists,
-                422,
+                AppConstants.httpStatus.ok,
                 AppConstants.errMsgs.userExists(user.email),
             ));
         }
@@ -31,7 +31,7 @@ const signupStrategy = new LocalStrategy({
         return done(null, {
             ...handleResponse(
                 AppConstants.responseCodes.signupSuccess,
-                201,
+                AppConstants.httpStatus.created,
                 AppConstants.successMsgs.signupSuccess(user.firstName),
             ),
             registeredUser,
@@ -40,7 +40,7 @@ const signupStrategy = new LocalStrategy({
         return done(null, {
             ...handleResponse(
                 AppConstants.responseCodes.genericErr,
-                500,
+                AppConstants.httpStatus.internalServerError,
                 AppConstants.errMsgs.genericMsg,
             ),
             ...error,

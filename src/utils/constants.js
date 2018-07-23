@@ -13,10 +13,18 @@ const responseCodes = {
     genericErr: 'E_GENERIC_ERROR',
 };
 
+const httpStatus = {
+    ok: 200,
+    created: 201,
+    unprocessableEntity: 422,
+    internalServerError: 500,
+};
+
 const AppConstants = {
     errMsgs,
     successMsgs,
     responseCodes,
+    httpStatus,
 };
 
 export default AppConstants;

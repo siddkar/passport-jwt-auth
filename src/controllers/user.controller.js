@@ -1,5 +1,6 @@
 const signup = async (req, res) => {
-    res.status(req.user.status).send(req.user);
+    const signupRes = { ...req.user };
+    res.status(signupRes.status).send(signupRes);
 };
 
 const UserController = {
