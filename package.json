@@ -4,8 +4,8 @@
   "description": "Securing REST api's using passport jwt and bcrypt",
   "main": "index.js",
   "scripts": {
-    "init": "npm install && npm install -g rimraf && mkdir logs",
-    "start:before": "rimraf logs && mkdir logs",
+    "init": "npm install && npm install -g rimraf && mkdir logs | md logs",
+    "start:before": "rimraf logs &&  mkdir logs | md logs",
     "start": "nodemon ./src/index.js --watch src --exec babel-node | pino-tee info ./logs/info-logs.log error ./logs/error-logs.log > ./logs/all-logs.log",
     "build": "./node_modules/.bin/babel ./src -d dist --presets env,stage-3 --ignore ./src/_test/*.spec.js,./node_modules",
     "serve": "node ./dist/index.js",

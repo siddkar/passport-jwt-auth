@@ -2,10 +2,9 @@ import passport from 'passport';
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import LocalStrategy from 'passport-local';
 import { User } from '../models';
-import { AppConstants, handleResponse } from '../utils';
+import { AppConstants, handleResponse, errorLog } from '../utils';
 import { logger } from '../config';
 
-const session = false;
 const passReqToCallback = true;
 
 const jwtOptions = {
@@ -29,8 +28,8 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
                 AppConstants.httpStatus.unprocessableEntity,
                 AppConstants.errMsgs.userExists(user.email),
             );
-            logger.error({ type: AppConstants.responseCodes.userExists, existingUserErr });
-            return done(null, existingUserErr);
+            logger.error(errorLog('auth.signupStrategy', AppConstants.responseCodes.userExists, existingUserErr));
+            return done(existingUserErr);
         }
         const newUser = await User.create(user);
         return done(null, {
@@ -41,15 +40,15 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
             ),
             newUser,
         });
-    } catch (err) {
+    } catch (error) {
         // logging error rather than sending through API
-        logger.error({ type: AppConstants.errMsgs.genericMsg, err });
+        logger.error(errorLog('auth.signupStrategy', AppConstants.errMsgs.genericMsg, error));
         const genericError = handleResponse(
             AppConstants.responseCodes.genericErr,
             AppConstants.httpStatus.internalServerError,
             AppConstants.errMsgs.genericMsg,
         );
-        return done(null, genericError);
+        return done(genericError);
     }
 });
 
@@ -70,11 +69,11 @@ passport.use('signup', signupStrategy);
 passport.use('validateToken', validateToken);
 
 const initialize = () => passport.initialize();
-const signup = passport.authenticate('signup', { session });
+// const signup = passport.authenticate('signup', { session });
 
 const AuthMiddleware = {
     initialize,
-    signup,
+    // signup,
 };
 
 export default AuthMiddleware;
