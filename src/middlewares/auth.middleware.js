@@ -1,79 +1,61 @@
 import passport from 'passport';
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
-import LocalStrategy from 'passport-local';
-import { User } from '../models';
-import { AppConstants, handleResponse, errorLog } from '../utils';
-import { logger } from '../config';
+import jwt from 'jsonwebtoken';
+import { ErrorHandler, ResponseEntity, AppConstants } from '../utils';
 
-const passReqToCallback = true;
+const session = false;
 
-const jwtOptions = {
-    secretOrKey: process.env.SECRET_KEY,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-};
-
-const localStrategyOptions = {
-    usernameField: 'email',
-    passwordField: 'password',
-    passReqToCallback,
-};
-
-const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email, password, done) => {
-    const user = { ...req.body };
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            const existingUserErr = handleResponse(
-                AppConstants.responseCodes.userExists,
-                AppConstants.httpStatus.unprocessableEntity,
-                AppConstants.errMsgs.userExists(user.email),
-            );
-            logger.error(errorLog('auth.signupStrategy', AppConstants.responseCodes.userExists, existingUserErr));
-            return done(existingUserErr);
+const signupCallback = async (req, res) => {
+    passport.authenticate('signup', async (err, success) => {
+        try {
+            if (err) {
+                const error = await err;
+                res.status(error.status).json(error);
+            } else {
+                const user = await success;
+                res.status(user.status).json(user);
+            }
+        } catch (error) {
+            const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.signupCallback');
+            res.status(genericError.status).json(genericError);
         }
-        const newUser = await User.create(user);
-        return done(null, {
-            ...handleResponse(
-                AppConstants.responseCodes.signupSuccess,
-                AppConstants.httpStatus.created,
-                AppConstants.successMsgs.signupSuccess(user.firstName),
-            ),
-            newUser,
-        });
-    } catch (error) {
-        // logging error rather than sending through API
-        logger.error(errorLog('auth.signupStrategy', AppConstants.errMsgs.genericMsg, error));
-        const genericError = handleResponse(
-            AppConstants.responseCodes.genericErr,
-            AppConstants.httpStatus.internalServerError,
-            AppConstants.errMsgs.genericMsg,
-        );
-        return done(genericError);
-    }
-});
+    })(req, res);
+};
 
-const validateToken = new JwtStrategy(jwtOptions, async (payload, done) => {
-    let user = {};
-    try {
-        user = await User.find({ username: payload.username });
-    } catch (err) {
-        return done(new Error('Incorrect username or password!!!'), null);
-    }
-    if (user) {
-        return done(null, user);
-    }
-    return done(new Error('Incorrect username or password!!!'), null);
-});
-
-passport.use('signup', signupStrategy);
-passport.use('validateToken', validateToken);
-
-const initialize = () => passport.initialize();
-// const signup = passport.authenticate('signup', { session });
+const loginCallback = async (req, res) => {
+    passport.authenticate('login', async (err, success) => {
+        try {
+            if (err) {
+                const error = await err;
+                res.status(error.status).json(error);
+            } else {
+                const user = await success;
+                req.login(user, { session }, async () => {
+                    /* eslint-disable no-underscore-dangle */
+                    const data = { _id: user._id, email: user.email };
+                    try {
+                        const token = await jwt.sign({ data }, process.env.SECRET_KEY);
+                        const responseEntity = ResponseEntity(
+                            AppConstants.successCode.loginSuccess,
+                            AppConstants.httpStatus.ok,
+                            AppConstants.successMsgs.loginSuccess(user.firstName),
+                        );
+                        res.status(responseEntity.status).json({ ...responseEntity, token });
+                    } catch (error) {
+                        const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.loginCallback');
+                        res.status(genericError.status).json(genericError);
+                    }
+                });
+            }
+        } catch (error) {
+            const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.loginCallback');
+            res.status(genericError.status).json(genericError);
+        }
+    })(req, res);
+};
 
 const AuthMiddleware = {
-    initialize,
-    // signup,
+    signupCallback,
+    loginCallback,
 };
 
 export default AuthMiddleware;

@@ -51,8 +51,8 @@ UserSchema.pre('save', async function savePre(next) {
 UserSchema.methods.isValidPassword = async function comparePwd(password) {
     // Hashes the password sent by the user for login and checks if the hashed password stored in the
     // database matches the one sent. Returns true if it does else false.
-    const compare = await bcrypt.compare(password, this.password);
-    return compare;
+    const valid = await bcrypt.compare(password, this.password);
+    return valid;
 };
 
 export default mongoose.model('user', UserSchema);
