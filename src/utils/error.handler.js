@@ -9,7 +9,7 @@ const genericErrorHandler = (error, from) => {
         AppConstants.errMsgs.genericMsg,
     );
     // logging error rather than sending through API
-    logError(from, AppConstants.errorCode.genericErr, error);
+    logError(from, AppConstants.errorCode.genericErr, error.message);
     // returning error responseEntity
     return genericError;
 };

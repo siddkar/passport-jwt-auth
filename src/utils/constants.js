@@ -8,6 +8,7 @@ const errMsgs = {
 const successMsgs = {
     signupSuccess: name => `User '${name}' registered successfully!!!`,
     loginSuccess: name => `User '${name}' logged in successfully!!!`,
+    genericMsg: 'Request successfully processed!!!',
 };
 
 const errorCode = {
@@ -20,6 +21,7 @@ const errorCode = {
 const successCode = {
     signupSuccess: 'S_SIGNUP_SUCCESS',
     loginSuccess: 'S_LOGIN_SUCCESS',
+    genericSuccess: 'S_GENERIC_SUCCESS',
 };
 
 const httpStatus = {

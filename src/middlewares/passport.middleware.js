@@ -1,15 +1,15 @@
 import passport from 'passport';
-// import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
+import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import LocalStrategy from 'passport-local';
 import { User as UserModel } from '../models';
 import { AppConstants, ResponseEntity, ErrorHandler } from '../utils';
 
 const passReqToCallback = true;
 
-/* const jwtOptions = {
+const jwtOptions = {
     secretOrKey: process.env.SECRET_KEY,
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-}; */
+};
 
 const localStrategyOptions = {
     usernameField: 'email',
@@ -30,7 +30,6 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
             ));
         }
         const newUser = await UserModel.create(user);
-        /* eslint-disable no-underscore-dangle */
         return done(null, {
             ...ResponseEntity(
                 AppConstants.successCode.signupSuccess,
@@ -69,8 +68,17 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
     }
 });
 
+const authStrategy = new JwtStrategy(jwtOptions, async (token, done) => {
+    try {
+        return done(null, token.user);
+    } catch (error) {
+        return done(ErrorHandler.genericErrorHandler(error, 'auth.authStrategy'));
+    }
+});
+
 passport.use('signup', signupStrategy);
 passport.use('login', loginStrategy);
+passport.use('auth', authStrategy);
 
 const initialize = () => passport.initialize();
 

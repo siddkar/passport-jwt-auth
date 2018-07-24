@@ -15,7 +15,7 @@ const signupCallback = async (req, res) => {
                 res.status(user.status).json(user);
             }
         } catch (error) {
-            const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.signupCallback');
+            const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.signupCallback');
             res.status(genericError.status).json(genericError);
         }
     })(req, res);
@@ -33,7 +33,7 @@ const loginCallback = async (req, res) => {
                     /* eslint-disable no-underscore-dangle */
                     const data = { _id: user._id, email: user.email };
                     try {
-                        const token = await jwt.sign({ data }, process.env.SECRET_KEY);
+                        const token = await jwt.sign({ user: data }, process.env.SECRET_KEY);
                         const responseEntity = ResponseEntity(
                             AppConstants.successCode.loginSuccess,
                             AppConstants.httpStatus.ok,
@@ -41,21 +41,24 @@ const loginCallback = async (req, res) => {
                         );
                         res.status(responseEntity.status).json({ ...responseEntity, token });
                     } catch (error) {
-                        const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.loginCallback');
+                        const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.loginCallback');
                         res.status(genericError.status).json(genericError);
                     }
                 });
             }
         } catch (error) {
-            const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.loginCallback');
+            const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.loginCallback');
             res.status(genericError.status).json(genericError);
         }
     })(req, res);
 };
 
+const auth = passport.authenticate('auth', { session });
+
 const AuthMiddleware = {
     signupCallback,
     loginCallback,
+    auth,
 };
 
 export default AuthMiddleware;
