@@ -23,7 +23,7 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
             return done(ErrorHandler.customErrorHandler(
-                'auth.signupStrategy',
+                'passport.middleware.signupStrategy',
                 AppConstants.errorCode.userExists,
                 AppConstants.httpStatus.unprocessableEntity,
                 AppConstants.errMsgs.userExists(user.email),
@@ -38,7 +38,7 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
             ),
         });
     } catch (error) {
-        return done(ErrorHandler.genericErrorHandler(error, 'auth.signupStrategy'));
+        return done(ErrorHandler.genericErrorHandler(error, 'passport.middleware.signupStrategy'));
     }
 });
 
@@ -47,7 +47,7 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
         const user = await UserModel.findOne({ email });
         if (!user) {
             return done(ErrorHandler.customErrorHandler(
-                'auth.loginStrategy',
+                'passport.middleware.loginStrategy',
                 AppConstants.errorCode.userNotFound,
                 AppConstants.httpStatus.notFound,
                 AppConstants.errMsgs.userNotFound(email),
@@ -56,7 +56,7 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
         const validate = await user.isValidPassword(password);
         if (!validate) {
             return done(ErrorHandler.customErrorHandler(
-                'auth.loginStrategy',
+                'passport.middleware.loginStrategy',
                 AppConstants.errorCode.unauthorizedUser,
                 AppConstants.httpStatus.unauthorized,
                 AppConstants.errMsgs.unauthorizedUser,
@@ -64,7 +64,7 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
         }
         return done(null, user);
     } catch (error) {
-        return done(ErrorHandler.genericErrorHandler(error, 'auth.loginStrategy'));
+        return done(ErrorHandler.genericErrorHandler(error, 'passport.middleware.loginStrategy'));
     }
 });
 
@@ -72,7 +72,7 @@ const authStrategy = new JwtStrategy(jwtOptions, async (token, done) => {
     try {
         return done(null, token.user);
     } catch (error) {
-        return done(ErrorHandler.genericErrorHandler(error, 'auth.authStrategy'));
+        return done(ErrorHandler.genericErrorHandler(error, 'passport.middleware.authStrategy'));
     }
 });
 
