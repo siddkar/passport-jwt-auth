@@ -1,4 +1,4 @@
 import UserController from './user.controller';
+import AuthController from './auth.controller';
 
-/* eslint-disable import/prefer-default-export */
-export { UserController };
+export { UserController, AuthController };

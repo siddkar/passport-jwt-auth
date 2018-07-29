@@ -31,6 +31,7 @@
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "express-bearer-token": "^2.2.0",
     "express-pino-logger": "^3.0.2",
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.2.4",
@@ -38,7 +39,8 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "pino": "^4.17.3",
-    "pino-tee": "^0.2.2"
+    "pino-tee": "^0.2.2",
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

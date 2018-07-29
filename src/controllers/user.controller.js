@@ -1,7 +1,7 @@
 import { User as UserModel } from '../models';
 import { ErrorHandler, AppConstants, ResponseEntity } from '../utils';
 
-const getProfile = async (req, res) => {
+const getProfile = async (req, res, next) => {
     try {
         /* eslint-disable no-underscore-dangle */
         const user = await UserModel.findOne({ _id: req.user._id }, {
@@ -21,7 +21,7 @@ const getProfile = async (req, res) => {
         });
     } catch (error) {
         const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.getProfile');
-        res.status(genericError.status).json(genericError);
+        next(genericError);
     }
 };
 

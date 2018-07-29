@@ -3,12 +3,14 @@ import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import LocalStrategy from 'passport-local';
 import { User as UserModel } from '../models';
 import { AppConstants, ResponseEntity, ErrorHandler } from '../utils';
+import { redisClient } from '../config';
 
 const passReqToCallback = true;
 
 const jwtOptions = {
     secretOrKey: process.env.SECRET_KEY,
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    passReqToCallback,
 };
 
 const localStrategyOptions = {
@@ -68,8 +70,18 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
     }
 });
 
-const authStrategy = new JwtStrategy(jwtOptions, async (token, done) => {
+const authStrategy = new JwtStrategy(jwtOptions, async (req, token, done) => {
+    const { token: bearerToken } = req;
     try {
+        const isBlacklistedToken = await redisClient.sismemberAsync('blacklisted-tokens', bearerToken);
+        if (isBlacklistedToken === 1) {
+            return done(ErrorHandler.customErrorHandler(
+                'passport.middleware.loginStrategy',
+                AppConstants.errorCode.unauthorizedUser,
+                AppConstants.httpStatus.unauthorized,
+                AppConstants.errMsgs.unauthorizedUser,
+            ));
+        }
         return done(null, token.user);
     } catch (error) {
         return done(ErrorHandler.genericErrorHandler(error, 'passport.middleware.authStrategy'));
