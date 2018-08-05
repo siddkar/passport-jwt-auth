@@ -7,11 +7,11 @@ bluebird.promisifyAll(redis);
 const redisClient = redis.createClient();
 
 redisClient.on('connect', () => {
-    logger.info('Connection with Redis-Server successful!!!');
+    logger.info({ message: 'Connection with Redis-Server successful!!!' });
 });
 
-redisClient.on('error', () => {
-    logger.error('Error establishing connection with Redis-Server!!!');
+redisClient.on('error', (err) => {
+    logger.error({ message: `Error establishing connection with Redis-Server!!! : ${err.message}` });
 });
 
 export default redisClient;

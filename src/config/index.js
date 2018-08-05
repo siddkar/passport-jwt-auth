@@ -1,6 +1,14 @@
+import initializeDotenv from './dotenv.config';
 import mongoose from './db.config';
 import redisClient from './redis.config';
 import { logger, expressLogger } from './pino.config';
+
+// initializing env once
+if (initializeDotenv.parsed) {
+    logger.info({ message: 'Successfully initialized env !!!' });
+} else if (initializeDotenv.error) {
+    logger.error({ message: 'Error initializing env !!!' });
+}
 
 export {
     mongoose,

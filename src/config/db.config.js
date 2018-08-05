@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 import bluebird from 'bluebird';
-import dotenv from 'dotenv';
 import { logger } from './pino.config';
-
-// instantiating dotenv
-dotenv.config();
 
 // Promisifing Mongoose
 mongoose.Promise = bluebird.Promise;
@@ -13,11 +9,9 @@ mongoose.Promise = bluebird.Promise;
 const dbName = `${process.env.DB_NAME}`;
 const dbUser = `${process.env.DB_USER}`;
 const dbPass = `${process.env.DB_PASS}`;
-const dbHost = `${process.env.DB_HOST}`;
-// const dbPort = `${process.env.DB_PORT}`;
+const dbHost = `${process.env.DB_HOST}`; // Includes DBPort
 
 // setting up the uri
-// const uri = `mongodb://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}`;
 const uri = `mongodb+srv://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
 
 /**

@@ -1,13 +1,9 @@
 import Express from 'express';
 import bearerToken from 'express-bearer-token';
-import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { logger, expressLogger } from './config';
 import router from './routes';
 import { PassportMiddleware, errorHandlerMiddleware } from './middlewares';
-
-// initialize dotenv variables
-dotenv.config();
 
 // initialize express
 const app = Express();

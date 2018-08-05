@@ -1,7 +1,7 @@
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { ErrorHandler, ResponseEntity, AppConstants } from '../utils';
-import { redisClient } from '../config';
+import { redisClient, logger } from '../config';
 
 const session = false;
 
@@ -29,29 +29,22 @@ const loginCallback = async (req, res, next) => {
                 const error = await err;
                 next(error);
             } else {
-                const user = await success;
-                req.login(user, { session }, async (error) => {
+                const userData = await success;
+                req.login(userData, { session }, async (error) => {
                     if (error) {
                         next(error);
                     }
                     /* eslint-disable no-underscore-dangle */
-                    const data = { _id: user._id, email: user.email };
+                    const data = { _id: userData._id, email: userData.email };
                     try {
-                        const activeToken = await redisClient.hgetAsync('active-users', user.email);
-                        if (activeToken) {
-                            redisClient.saddAsync('blacklisted-tokens', activeToken)
-                                .then(result => result)
-                                .catch(e => ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback'));
-                        }
                         const token = await jwt.sign({ user: data }, process.env.SECRET_KEY, { expiresIn: '1h' });
+                        await redisClient.hmsetAsync('active-users', [userData.email, token]);
                         const responseEntity = ResponseEntity(
                             AppConstants.successCode.loginSuccess,
                             AppConstants.httpStatus.ok,
-                            AppConstants.successMsgs.loginSuccess(user.firstName),
+                            AppConstants.successMsgs.loginSuccess(userData.firstName),
                         );
-                        redisClient.hmsetAsync('active-users', [user.email, token])
-                            .then(result => result)
-                            .catch(e => ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback'));
+                        logger.info(responseEntity);
                         res.status(responseEntity.status).json({ ...responseEntity, token });
                     } catch (e) {
                         const genericError = ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback');
