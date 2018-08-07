@@ -73,7 +73,7 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
 const authStrategy = new JwtStrategy(jwtOptions, async (req, token, done) => {
     const { token: bearerToken } = req;
     try {
-        const activeToken = await redisClient.hgetAsync('active-users', token.data.email);
+        const activeToken = await redisClient.hgetAsync('active-users', token.user.email);
         if (activeToken !== bearerToken) {
             return done(ErrorHandler.customErrorHandler(
                 'passport.middleware.loginStrategy',
@@ -82,7 +82,7 @@ const authStrategy = new JwtStrategy(jwtOptions, async (req, token, done) => {
                 AppConstants.errMsgs.unauthorizedUser,
             ));
         }
-        return done(null, token.data);
+        return done(null, token.user);
     } catch (error) {
         return done(ErrorHandler.genericErrorHandler(error, 'passport.middleware.authStrategy'));
     }
