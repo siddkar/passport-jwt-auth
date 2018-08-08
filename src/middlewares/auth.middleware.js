@@ -59,7 +59,6 @@ const loginCallback = async (req, res, next) => {
     })(req, res, next);
 };
 
-// const authCallback = passport.authenticate('auth', { session });
 const authCallback = async (req, res, next) => {
     passport.authenticate('auth', { session }, async (err, success, info) => {
         try {
