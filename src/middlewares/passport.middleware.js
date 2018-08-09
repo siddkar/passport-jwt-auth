@@ -2,7 +2,9 @@ import passport from 'passport';
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import LocalStrategy from 'passport-local';
 import { User as UserModel } from '../models';
-import { AppConstants, ResponseEntity, ErrorHandler } from '../utils';
+import {
+    AppConstants, ResponseEntity, ErrorHandler, ErrorUtils,
+} from '../utils';
 import { redisClient } from '../config';
 
 const passReqToCallback = true;
@@ -24,12 +26,7 @@ const signupStrategy = new LocalStrategy(localStrategyOptions, async (req, email
     try {
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
-            return done(ErrorHandler.customErrorHandler(
-                'passport.middleware.signupStrategy',
-                AppConstants.errorCode.userExists,
-                AppConstants.httpStatus.unprocessableEntity,
-                AppConstants.errMsgs.userExists(user.email),
-            ));
+            return done(ErrorUtils.userexists('passport.middleware.signupStrategy', user.email));
         }
         const newUser = await UserModel.create(user);
         return done(null, {
@@ -48,21 +45,11 @@ const loginStrategy = new LocalStrategy(localStrategyOptions, async (req, email,
     try {
         const user = await UserModel.findOne({ email });
         if (!user) {
-            return done(ErrorHandler.customErrorHandler(
-                'passport.middleware.loginStrategy',
-                AppConstants.errorCode.userNotFound,
-                AppConstants.httpStatus.notFound,
-                AppConstants.errMsgs.userNotFound(email),
-            ));
+            return done(ErrorUtils.usernotfound('passport.middleware.loginStrategy', email));
         }
         const validate = await user.isValidPassword(password);
         if (!validate) {
-            return done(ErrorHandler.customErrorHandler(
-                'passport.middleware.loginStrategy',
-                AppConstants.errorCode.unauthorizedUser,
-                AppConstants.httpStatus.unauthorized,
-                AppConstants.errMsgs.unauthorizedUser,
-            ));
+            return done(ErrorUtils.unauthorized('passport.middleware.loginStrategy'));
         }
         return done(null, user);
     } catch (error) {
@@ -75,12 +62,7 @@ const authStrategy = new JwtStrategy(jwtOptions, async (req, token, done) => {
     try {
         const activeToken = await redisClient.hgetAsync('active-users', token.user.email);
         if (activeToken !== bearerToken) {
-            return done(ErrorHandler.customErrorHandler(
-                'passport.middleware.loginStrategy',
-                AppConstants.errorCode.unauthorizedUser,
-                AppConstants.httpStatus.unauthorized,
-                AppConstants.errMsgs.unauthorizedUser,
-            ));
+            return done(ErrorUtils.unauthorized('passport.middleware.authStrategy'));
         }
         return done(null, token.user);
     } catch (error) {

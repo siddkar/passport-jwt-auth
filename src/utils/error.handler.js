@@ -1,5 +1,5 @@
 import logError from './log.error';
-import AppConstants from './constants';
+import AppConstants from './app.constants';
 import ResponseEntity from './response.entity';
 
 const genericErrorHandler = (error, from) => {

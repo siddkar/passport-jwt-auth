@@ -2,6 +2,7 @@ const errMsgs = {
     userExists: email => `User with email: '${email}' already exists!!! Please try to login`,
     userNotFound: email => `User with email: '${email}' not found!!! Please signup`,
     unauthorizedUser: 'Please login again or reset your password!!!',
+    sessionExpired: 'Session Expired',
     genericMsg: 'Something went wrong!!!',
 };
 

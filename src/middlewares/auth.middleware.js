@@ -1,6 +1,8 @@
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { ErrorHandler, ResponseEntity, AppConstants } from '../utils';
+import {
+    ErrorHandler, ResponseEntity, AppConstants, ErrorUtils,
+} from '../utils';
 import { redisClient, logger } from '../config';
 
 const session = false;
@@ -9,8 +11,7 @@ const signupCallback = async (req, res, next) => {
     passport.authenticate('signup', async (err, success) => {
         try {
             if (err) {
-                const error = await err;
-                next(error);
+                next(await err);
             } else {
                 const user = await success;
                 res.status(user.status).json(user);
@@ -26,8 +27,7 @@ const loginCallback = async (req, res, next) => {
     passport.authenticate('login', async (err, success) => {
         try {
             if (err) {
-                const error = await err;
-                next(error);
+                next(await err);
             } else {
                 const userData = await success;
                 req.login(userData, { session }, async (error) => {
@@ -63,34 +63,29 @@ const authCallback = async (req, res, next) => {
     passport.authenticate('auth', { session }, async (err, success, info) => {
         try {
             if (err) {
-                const error = await err;
-                next(error);
+                next(await err);
             }
-            if (!success && info && info.message) {
-                const { token } = req;
-                const { user } = jwt.verify(token, process.env.SECRET_KEY, { ignoreExpiration: true });
-
-                // jwt expired
-                if (info.message.trim().toLowerCase() === 'jwt expired') {
-                    try {
-                        // Invalidating the token from redis
-                        await redisClient.hdelAsync('active-users', user.email);
-                    } catch (error) {
-                        const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.authCallback');
-                        next(genericError);
+            if (!success) {
+                if (info && info.message) {
+                    const { token } = req;
+                    const { user } = jwt.verify(token, process.env.SECRET_KEY, { ignoreExpiration: true });
+                    // jwt expired
+                    if (info.message.trim().toLowerCase() === 'jwt expired') {
+                        try {
+                            // Invalidating the token from redis
+                            await redisClient.hdelAsync('active-users', user.email);
+                        } catch (error) {
+                            const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.authCallback');
+                            next(genericError);
+                        }
+                        next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
                     }
                 }
-
                 // No auth token
                 // invalid signature
                 // jwt malformed
                 // Just unauthorized - nothing serious, so continue normally
-                next(ErrorHandler.customErrorHandler(
-                    'auth.middleware.authCallback',
-                    AppConstants.errorCode.unauthorizedUser,
-                    AppConstants.httpStatus.unauthorized,
-                    AppConstants.errMsgs.unauthorizedUser,
-                ));
+                next(ErrorUtils.unauthorized('auth.middleware.authCallback'));
             }
             req.user = await success;
             next();
