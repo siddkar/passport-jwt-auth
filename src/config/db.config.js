@@ -13,7 +13,6 @@ const dbPass = `${process.env.DB_PASS}`;
 const dbHost = `${process.env.DB_HOST}`; // Includes DBPort
 
 // setting up the uri
-// const uri = `mongodb+srv://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
 const uri = `${dbPrefix}://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
 
 /**
