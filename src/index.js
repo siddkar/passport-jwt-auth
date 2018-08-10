@@ -24,12 +24,10 @@ app.use(PassportMiddleware.initialize());
 // adding context path
 app.use('/api', router);
 
-app.get('/api', (req, res) => {
-    res.status(200).json({
-        status: 200,
-        message: 'API is up and running... Please login to continue...',
-    });
-});
+app.get('/api', (req, res) => res.status(200).json({
+    status: 200,
+    message: 'API is up and running... Please login to continue...',
+}));
 
 app.get('/', (req, res) => res.redirect('/api'));
 
@@ -38,5 +36,5 @@ app.use(errorHandlerMiddleware);
 
 // starting the server
 app.listen(process.env.APP_PORT, () => {
-    logger.info(`Server listening at http://${process.env.APP_HOST}:${process.env.APP_PORT}/`);
+    logger.info({ message: `Server listening at http://${process.env.APP_HOST}:${process.env.APP_PORT}/` });
 });

@@ -11,7 +11,7 @@ const getProfile = async (req, res, next) => {
             phone: 1,
             _id: 0,
         });
-        res.status(AppConstants.httpStatus.ok).json({
+        return res.status(AppConstants.httpStatus.ok).json({
             ...ResponseEntity(
                 AppConstants.successCode.genericSuccess,
                 AppConstants.httpStatus.ok,
@@ -21,7 +21,7 @@ const getProfile = async (req, res, next) => {
         });
     } catch (error) {
         const genericError = ErrorHandler.genericErrorHandler(error, 'user.controller.getProfile');
-        next(genericError);
+        return next(genericError);
     }
 };
 

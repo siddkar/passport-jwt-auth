@@ -11,16 +11,15 @@ const logout = async (req, res, next) => {
         if (isActive) {
             logger.info({ message: `${user.email} logged out successfully!!!` });
             req.logout();
-            res.redirect('/api');
-        } else {
-            next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
+            return res.redirect('/api');
         }
+        return next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
     } catch (error) {
         if (error.message.trim().toLowerCase() === 'jwt expired') {
-            next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
+            return next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
         }
         const genericError = ErrorHandler.genericErrorHandler(error, 'auth.controller.logout');
-        next(genericError);
+        return next(genericError);
     }
 };
 

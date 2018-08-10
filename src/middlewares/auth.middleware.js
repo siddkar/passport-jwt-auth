@@ -11,51 +11,45 @@ const signupCallback = async (req, res, next) => {
     passport.authenticate('signup', async (err, success) => {
         try {
             if (err) {
-                next(await err);
-            } else {
-                const user = await success;
-                res.status(user.status).json(user);
+                return next(err);
             }
+            const user = success;
+            return res.status(user.status).json(user);
         } catch (error) {
             const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.signupCallback');
-            next(genericError);
+            return next(genericError);
         }
     })(req, res, next);
 };
 
 const loginCallback = async (req, res, next) => {
     passport.authenticate('login', async (err, success) => {
-        try {
-            if (err) {
-                next(await err);
-            } else {
-                const userData = await success;
-                req.login(userData, { session }, async (error) => {
-                    if (error) {
-                        next(error);
-                    }
-                    /* eslint-disable no-underscore-dangle */
-                    const data = { _id: userData._id, email: userData.email };
-                    try {
-                        const token = await jwt.sign({ user: data }, process.env.SECRET_KEY, { expiresIn: '1h' });
-                        await redisClient.hmsetAsync('active-users', [userData.email, token]);
-                        const responseEntity = ResponseEntity(
-                            AppConstants.successCode.loginSuccess,
-                            AppConstants.httpStatus.ok,
-                            AppConstants.successMsgs.loginSuccess(userData.firstName),
-                        );
-                        logger.info(responseEntity);
-                        res.status(responseEntity.status).json({ ...responseEntity, token });
-                    } catch (e) {
-                        const genericError = ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback');
-                        next(genericError);
-                    }
-                });
-            }
-        } catch (error) {
-            const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.loginCallback');
-            next(genericError);
+        if (err) {
+            return next(err);
         }
+        const userData = success;
+        req.login(userData, { session }, async (error) => {
+            if (error) {
+                return next(error);
+            }
+            /* eslint-disable no-underscore-dangle */
+            const data = { _id: userData._id, email: userData.email };
+            try {
+                const token = await jwt.sign({ user: data }, process.env.SECRET_KEY, { expiresIn: '1h' });
+                await redisClient.hmsetAsync('active-users', [userData.email, token]);
+                const responseEntity = ResponseEntity(
+                    AppConstants.successCode.loginSuccess,
+                    AppConstants.httpStatus.ok,
+                    AppConstants.successMsgs.loginSuccess(userData.firstName),
+                );
+                logger.info(responseEntity);
+                return res.status(responseEntity.status).json({ ...responseEntity, token });
+            } catch (e) {
+                const genericError = ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback');
+                return next(genericError);
+            }
+        });
+        return next();
     })(req, res, next);
 };
 
@@ -63,7 +57,7 @@ const authCallback = async (req, res, next) => {
     passport.authenticate('auth', { session }, async (err, success, info) => {
         try {
             if (err) {
-                next(await err);
+                return next(err);
             }
             if (!success) {
                 if (info && info.message) {
@@ -76,22 +70,19 @@ const authCallback = async (req, res, next) => {
                             await redisClient.hdelAsync('active-users', user.email);
                         } catch (error) {
                             const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.authCallback');
-                            next(genericError);
+                            return next(genericError);
                         }
-                        next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
+                        return next(ErrorUtils.unauthorized('auth.middleware.authCallback', AppConstants.errMsgs.sessionExpired));
                     }
                 }
-                // No auth token
-                // invalid signature
-                // jwt malformed
-                // Just unauthorized - nothing serious, so continue normally
-                next(ErrorUtils.unauthorized('auth.middleware.authCallback'));
+                // jwt must be provided, invalid signature, jwt malformed
+                return next(ErrorUtils.unauthorized('auth.middleware.authCallback'));
             }
-            req.user = await success;
-            next();
+            req.user = success;
+            return next();
         } catch (error) {
             const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.authCallback');
-            next(genericError);
+            return next(genericError);
         }
     })(req, res, next);
 };

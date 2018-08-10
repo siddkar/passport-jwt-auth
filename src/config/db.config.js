@@ -12,7 +12,8 @@ const dbPass = `${process.env.DB_PASS}`;
 const dbHost = `${process.env.DB_HOST}`; // Includes DBPort
 
 // setting up the uri
-const uri = `mongodb+srv://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
+// const uri = `mongodb+srv://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
+const uri = `mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
 
 /**
  * Mongoose version for > 5.0, mongoose.connecct
@@ -28,6 +29,6 @@ const initializeMongoose = async () => {
 initializeMongoose().catch(err => logger.error(`Error connecting to Mongo!!! ErrMsg : ${err}`));
 
 mongoose.connection.once('open', () => {
-    logger.info(`Successfully connected to the database : '${dbName}', authenticated with '${dbUser}'`);
+    logger.info({ message: `Successfully connected to the database : '${dbName}', authenticated with '${dbUser}'` });
 });
 export default mongoose;
