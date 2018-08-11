@@ -6,7 +6,7 @@
   "scripts": {
     "init": "npm install && npm install -g rimraf && mkdir logs",
     "prestart": "rimraf logs &&  mkdir logs",
-    "start": "nodemon ./src/index.js --watch src --exec babel-node | pino-tee info ./logs/info-logs.log error ./logs/error-logs.log > ./logs/all-logs.log",
+    "start": "nodemon ./src/index.js --watch src --exec babel-node | pino-tee info ./logs/info-logs.log error ./logs/error-logs.log > ./logs/all-logs.log || true",
     "build": "./node_modules/.bin/babel ./src -d dist --presets env,stage-3 --ignore ./src/_test/*.spec.js,./node_modules",
     "serve": "node ./dist/index.js",
     "clean": "rimraf ./dist",
