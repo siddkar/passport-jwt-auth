@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import {
     ErrorHandler, ResponseEntity, AppConstants, ErrorUtils,
 } from '../utils';
-import { redisClient, logger } from '../config';
+import { redisClient } from '../config';
 
 const session = false;
 
@@ -24,32 +24,26 @@ const signupCallback = async (req, res, next) => {
 
 const loginCallback = async (req, res, next) => {
     passport.authenticate('login', async (err, success) => {
-        if (err) {
-            return next(err);
-        }
-        const userData = success;
-        req.login(userData, { session }, async (error) => {
-            if (error) {
-                return next(error);
+        req.login(success, { session }, async () => {
+            if (err) {
+                return next(err);
             }
             /* eslint-disable no-underscore-dangle */
-            const data = { _id: userData._id, email: userData.email };
+            const data = { _id: success._id, email: success.email };
             try {
                 const token = await jwt.sign({ user: data }, process.env.SECRET_KEY, { expiresIn: '1h' });
-                await redisClient.hmsetAsync('active-users', [userData.email, token]);
+                await redisClient.hmsetAsync('active-users', [data.email, token]);
                 const responseEntity = ResponseEntity(
                     AppConstants.successCode.loginSuccess,
                     AppConstants.httpStatus.ok,
-                    AppConstants.successMsgs.loginSuccess(userData.firstName),
+                    AppConstants.successMsgs.loginSuccess(success.firstName),
                 );
-                logger.info(responseEntity);
                 return res.status(responseEntity.status).json({ ...responseEntity, token });
-            } catch (e) {
-                const genericError = ErrorHandler.genericErrorHandler(e, 'auth.middleware.loginCallback');
+            } catch (error) {
+                const genericError = ErrorHandler.genericErrorHandler(error, 'auth.middleware.loginCallback');
                 return next(genericError);
             }
         });
-        return next();
     })(req, res, next);
 };
 
