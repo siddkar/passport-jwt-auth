@@ -8,12 +8,8 @@ const shutdownRedis = (redisClient, connectionName) => {
 };
 
 const shutdownMongoose = (mongoose, connectionName) => {
-    mongoose.connection.close(false, (err) => {
-        if (err) {
-            logger.error({ message: `Error while gracefully shutdown with MongoDB : ${err.mesage}` });
-        }
-        logInfo(connectionName);
-    });
+    mongoose.connection.close(false);
+    logInfo(connectionName);
 };
 
 export { shutdownRedis, shutdownMongoose };
