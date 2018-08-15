@@ -1,12 +1,15 @@
 import Express from 'express';
 import bearerToken from 'express-bearer-token';
 import bodyParser from 'body-parser';
+import expressMonitor from 'express-status-monitor';
 import { logger, expressLogger } from './config';
 import router from './routes';
 import { PassportMiddleware, errorHandlerMiddleware } from './middlewares';
 
 // initialize express
 const app = Express();
+
+app.use(expressMonitor({ path: '/api/status' }).middleware);
 
 // adding pino express logger middleware to express
 app.use(expressLogger);

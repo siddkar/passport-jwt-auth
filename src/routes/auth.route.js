@@ -13,4 +13,10 @@ authRouter.post('/login', AuthMiddleware.loginCallback);
 // logout user
 authRouter.get('/logout', AuthController.logout);
 
+// refresh token
+authRouter.post('/token', AuthMiddleware.refreshTokenCallback);
+
+// revoke token
+authRouter.post('/token/revoke', AuthMiddleware.revokeTokenCallback);
+
 export default authRouter;
