@@ -33,18 +33,21 @@ const onHealthCheck = async () => {
 };
 
 const shutdownRedis = connectionName => redisClient.quit()
-    .then(() => logInfo(connectionName))
-    .catch(err => logError('terminus.config.shutdownRedis', 'ERR_DISCONNECTING_FROM_REDIS', err));
+    .then(() => console.log(connectionName))
+    .catch(err => console.log('terminus.config.shutdownRedis', 'ERR_DISCONNECTING_FROM_REDIS', err));
 
 const shutdownMongoose = connectionName => mongoose.connection.close(false)
-    .then(() => logInfo(connectionName))
-    .catch(err => logError('terminus.config.shutdownMongoose', 'ERR_DISCONNECTING_FROM_MONGO', err));
+    .then(() => console.log(connectionName))
+    .catch(err => console.log('terminus.config.shutdownMongoose', 'ERR_DISCONNECTING_FROM_MONGO', err));
 
 const onSignal = () => Promise.all([shutdownRedis('Redis'), shutdownMongoose('Mongo')])
-    .then(() => logger.info({ message: 'All services gracefully shutdown' }))
-    .catch(err => logError('terminus.config.onSignal', 'ERR_DISCONNECTING_SERVICES', err));
+    .then(() => console.log({ message: 'All services gracefully shutdown' }))
+    .catch(err => console.log('terminus.config.onSignal', 'ERR_DISCONNECTING_SERVICES', err));
 
 const beforeShutdown = () => new Promise((resolve) => {
+    console.log('==========================');
+    console.log('I AM HERE : beforeShutdown');
+    console.log('==========================');
     setTimeout(resolve, 5000);
 });
 
