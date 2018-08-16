@@ -5,7 +5,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import expressMonitor from 'express-status-monitor';
 import terminus from '@godaddy/terminus';
-import { logger, expressLogger, terminusConfig } from './config';
+import ON_DEATH from 'death';
+import {
+    logger,
+    expressLogger,
+    terminusConfig,
+    onDeathCallback,
+} from './config';
+import logError from './utils/log.error';
 import router from './routes';
 import { PassportMiddleware, errorHandlerMiddleware } from './middlewares';
 
@@ -50,10 +57,27 @@ const server = http.createServer(app);
 // Begin reading from stdin so the process does not exit imidiately
 process.stdin.resume();
 
-// adding graceful shutdown and health checks for the application
+// adding health checks for the application
 terminus(server, terminusConfig);
 
 // starting the server
-server.listen(process.env.APP_PORT, () => {
+const httpServer = server.listen(process.env.APP_PORT, () => {
     logger.info({ message: `Server listening at http://${process.env.APP_HOST}:${process.env.APP_PORT}/` });
 });
+
+// adding logic to gracefully shutdown express server
+const deathCallback = async (signal) => {
+    try {
+        await onDeathCallback();
+        await httpServer.close();
+        logger.info({ message: 'Server Shutdown Gracefully!!!' });
+        logger.info({ message: `Termination Signal: ${signal} :: All services shutdown successfully!!!` });
+    } catch (err) {
+        logError('index.deathCallback', 'ERR_GRACEFUL_CONN_SHUTDOWN', err);
+    }
+};
+
+// adding graceful shutdown for active connections
+ON_DEATH(deathCallback);
+
+export default httpServer;
