@@ -115,7 +115,7 @@ const revokeTokenCallback = (req, res, next) => {
     if (refreshToken in refreshTokens) {
         delete refreshTokens[refreshToken];
     }
-    return next(ErrorHandler.customErrorHandler('from', 'code', 'status', 'msg'));
+    return next(ErrorHandler.customErrorHandler('auth.middleware.revokeTokenCallback', 'code', 'status', 'msg'));
 };
 
 const AuthMiddleware = {
